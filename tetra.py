@@ -140,8 +140,8 @@ def rotation(A,x,s):
 
 
 
-#THE FOLLOWING INTERSECT FUNCTION WAS OBTAINED FROM THE FOLLOWING STACK OVERFLOW THREAD
-#https://stackoverflow.com/questions/3252194/numpy-and-line-intersections
+#THE FOLLOWING get_intersect() FUNCTION WAS OBTAINED FROM THE  STACK OVERFLOW THREAD
+#https://stackoverflow.com/questions/3252194/numpy-and-line-intersections, answered by Norbu Tsering 
 
 def get_intersect(a1, a2, b1, b2):
     """ 
@@ -237,11 +237,11 @@ def family2(x):
     """
     return [5*math.pi/6-x,2*(math.pi/3)-x,x,x,2*math.pi/3-x,math.pi/6+x]
 
-#TO RUN, UNCOMMENT THE FOLLOWING SECTION (AND CHANGE THE DIHEDRALS ANGLES, IF NECESSARY)
+#TO RUN, USE THE FOLLOWING SECTION (AND CHANGE THE DIHEDRALS ANGLES, IF NECESSARY)
 #RECALL THAT THE ORDER IS 12,13,14,23,24,34
 #You can generate families of tetrahedra with rational angles, as in Theorem 1.8 of 
 #Professor Poonen's paper (http://math.mit.edu/~poonen/papers/space_vectors.pdf), using the two
-#family functions
+#family functions above. The following is an example!
 
 
 dihedrals=family2(0.2*math.pi)

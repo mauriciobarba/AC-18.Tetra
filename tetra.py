@@ -238,6 +238,20 @@ def family2(x):
     """
     return [5*math.pi/6-x,2*(math.pi/3)-x,x,x,2*math.pi/3-x,math.pi/6+x]
 
+def calculate_sixth(dihedrals):
+    """
+    Input:
+        dihedrals: a list of 5 angles corresponding to 12, 13, 14, 23, 24 (notice the order)
+    Output: 
+        list of all 6 dihedrals in the order 12, 13, 14, 23, 24
+    """
+    angle132=cosine_function(dihedrals[0], dihedrals[3], dihedrals[4])
+    angle213=cosine_function(dihedrals[0], dihedrals[1], dihedrals[2])
+    supplement=math.pi-angle213-angle132
+    u=math.sin(dihedrals[1])*math.sin(dihedrals[3])*math.cos(supplement)-math.cos(dihedrals[1])*math.cos(dihedrals[3])
+    dihedrals.append(math.acos(u))
+    return dihedrals
+
 #TO RUN, USE THE FOLLOWING SECTION (AND CHANGE THE DIHEDRALS ANGLES, IF NECESSARY)
 #RECALL THAT THE ORDER IS 12,13,14,23,24,34
 #You can generate families of tetrahedra with rational angles, as in Theorem 1.8 of 

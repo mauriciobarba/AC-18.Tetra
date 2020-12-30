@@ -216,6 +216,7 @@ def get_positions(planar):
     connect(position[1], three2, position[2])
     plt.gca().set_aspect('equal', adjustable='box')
     plt.axis('off')
+    plt.savefig('tetra.png', dpi=300) #you may want to change this to increase/decrease resolution, or even comment it if you don't want the code to save the plot
     plt.show()
 
 

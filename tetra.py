@@ -274,37 +274,24 @@ def calculate_sixth(dihedrals):
     return dihedrals
 def check_congruence(dihedrals1,dihedrals2):
     """
-    Input: Dihedral Angles of two (possibly identicaly) tetrahedra.
-    Output: List of all pairs of CONGRUENT triangles (T1,T2) that are faces of the two respective tetrahedra. 
+    Parameters
+    Dihedral angles of both tetrahedra, both in the order [12,13,14,23,24,34]
+    
+    Returns:
+    All pairs of confruent faces F1, F2 such that F1 is on Tetrahedron 1, and F2 is on Tetrahedron 2
     """
-    planar1=overall(dihedrals1)
-    planar2=overall(dihedrals2)
     length1=calculate_lengths(dihedrals1)
     length2=calculate_lengths(dihedrals2)
-    commonality={}
     list_congruences=[]
-    area1={}
-    area2={}
-    for i in range(1,4):
-        for j in range(1,4):
-            if i!=j:
-                for k in range(i+1,5):
-                    if j!=k:
-                        area1[(i,j,k)]=0.5*length1[(j,i)]*length1[(j,k)]*math.sin(planar1[(i,j,k)])
-                        area2[(i,j,k)]=0.5*length1[(j,i)]*length1[(j,k)]*math.sin(planar1[(i,j,k)])
-    for face1 in area1:
-        for face2 in area2:
-            if abs(area1[face1]-area2[face2])<0.001:
-                A1,B1,C1=face1
-                A2,B2,C2=face2
-                l=[length2[(A2,C2)],length2[(A2,B2)], length2[(B2,C2)]]
-                if  in_close(length1[(A1,B1)],l):
-                    u=remove_closest_element(length1[(A1,B1)],l)
-                    if  in_close(length1[(A1,C1)], u):
-                        v=remove_closest_element(length1[(A2,B2)],u)
-                        if in_close(length2[(B1,C1)],v):
-                            list_congruences.append((face1, face2))
-    return list_congruences
+    for face1 in permutations([1,2,3,4], 3):
+        for face2 in permutations([1,2,3,4], 3):
+            A1,B1,C1=face1
+            A2,B2,C2=face2
+            if abs(length1[(A1,B1)]-length2[(A2,B2)])<1e-10:
+                if abs(length1[(A1,C1)]-length2[(A2,C2)])<1e-10:
+                    if abs(length1[(B1, C1)]-length2[(B2,C2)])<1e-10:
+                        list_congruences.append((face1, face2))
+    return list_congruences  
 #TO RUN, USE THE FOLLOWING SECTION (AND CHANGE THE DIHEDRALS ANGLES, IF NECESSARY)
 #RECALL THAT THE ORDER IS 12,13,14,23,24,34
 #You can generate families of tetrahedra with rational angles, as in Theorem 1.8 of 

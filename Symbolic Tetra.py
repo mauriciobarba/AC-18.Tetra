@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Last Updated on on Wed Jan 20 14:21:35 2021
+Last Updated on on Jan 24 2021
 
 @author: anaschentouf
 """
 from sympy import *
-from itertools import permutations 
+from itertools import permutations, combinations
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import display, Math
+from sympy.simplify.fu import fu, TR10i
 from sympy import init_printing
+from sympy import print_latex
 from sympy import latex
-from sympy import simplify, cos, sin
+from sympy import Symbol
+from sympy.printing.latex import LatexPrinter, print_latex
+from sympy.solvers.inequalities import solve_rational_inequalities
+from sympy import Poly
+from sympy import simplify, cos, sin, pi
 from sympy import trigsimp,cancel
 from sympy import sqrt, simplify, count_ops, oo
 init_printing(use_latex='mathjax')
@@ -78,15 +84,16 @@ perms=[] #to avoid redundancy, we only consider angles (i,j,k) so that i<k
 for i in permutations([1,2,3,4], 3):
     if i[0]<i[2]:
         perms.append(i)
+        
 
 
 def overall(dihedrals=[acos(1/3)]*6):
     """
-    Returns the planar angles in order. If an angle has radian measure q*pi, only q is returned. 
+    Returns the planar angles in order. 
     """
     planar={}
     for tupl in perms:
-        planar[tupl]=dihed_to_planar(tupl[0], tupl[1], tupl[2], list_to_dict(dihedrals))/pi
+        planar[tupl]=dihed_to_planar(tupl[0], tupl[1], tupl[2], list_to_dict(dihedrals))
     return planar
 
 
@@ -106,10 +113,10 @@ def calculate_lengths(dihedrals=[acos(1/3)]*6):
         length: a (possible incomplete) dictionary of edge lengths in the terahedron
     Output:
         None, but the function adds the lengths of sides ik and jk to the dictionary""" 
-        d=length[(i,j)]/sin(pi*planar[(min(i,j),k,max(i,j))])
-        length[(i,k)]=d* sin(pi*planar[(min(i,k),j,max(i,k))])
+        d=length[(i,j)]/sin(planar[(min(i,j),k,max(i,j))])
+        length[(i,k)]=d* sin(planar[(min(i,k),j,max(i,k))])
         length[(k,i)]=length[(i,k)]
-        length[(j,k)]=d* sin(pi*planar[(min(j,k),i,max(j,k))])
+        length[(j,k)]=d* sin(planar[(min(j,k),i,max(j,k))])
         length[(k,j)]=length[(j,k)]
     length={}
     planar=overall(dihedrals)
@@ -205,10 +212,10 @@ def get_positions(planar, returner=False):
     position={} #initializes new dictionary
     position[1]=np.array([0, 0])
     position[4]=np.array([1,0])
-    position[2]=thirdpoint(position[1],position[4], planar[(2,1,4)]*pi, planar[(1,4,2)]*pi)
-    three1=thirdpoint(position[2],position[4], planar[(3,2,4)]*pi, planar[(2,4,3)]*pi)
-    three2=thirdpoint(position[1],position[2], planar[(2,1,3)]*pi, planar[(1,2,3)]*pi)
-    three3=thirdpoint(position[1],position[4], -planar[(3,1,4)]*pi, -planar[(1,4,3)]*pi)
+    position[2]=thirdpoint(position[1],position[4], planar[(2,1,4)], planar[(1,4,2)])
+    three1=thirdpoint(position[2],position[4], planar[(3,2,4)], planar[(2,4,3)])
+    three2=thirdpoint(position[1],position[2], planar[(2,1,3)], planar[(1,2,3)])
+    three3=thirdpoint(position[1],position[4], -planar[(3,1,4)], -planar[(1,4,3)])
     X=[position[1], position[2], position[4], three1, three2, three3]
     plt.figure(figsize=(3,4))
     plt.scatter([t[0] for t in X], [t[1] for t in X],color='blue',s=5)
@@ -258,23 +265,6 @@ def calculate_sixth(dihedrals):
     dihedrals.append(acos(u))
     return dihedrals
 
-
-
-#TO RUN, USE THE FOLLOWING SECTION (AND CHANGE THE DIHEDRALS ANGLES, IF NECESSARY)
-#RECALL THAT THE ORDER IS 12,13,14,23,24,34
-#You can generate families of tetrahedra with rational angles, as in Theorem 1.8 of 
-#Professor Poonen's paper (http://math.mit.edu/~poonen/papers/space_vectors.pdf), using the two
-#family functions
-
-dihedrals=[pi/7,pi/3,4*pi/7,4*pi/7, pi/3, 3*pi/7]
-# dihedrals=[pi/5, pi/3,pi/2, pi/2, pi-2*pi/5, pi/5]
-planar=overall(dihedrals)
-# for i in planar: 
-#     print(i, planar[i])
-lengths=calculate_lengths(dihedrals)
-for i in lengths:
-    print(i, lengths[i])
-    
 def get_3d(planar):
     pos=get_positions(planar, True)
     v12=pos[1]
@@ -283,6 +273,123 @@ def get_3d(planar):
     z=sqrt(lengths[(1,3)]**2-x**2-y**2)
     position3=(x,y,z)
     return ( tuple(pos[0]),tuple(pos[1]),position3, tuple(pos[2]))
+
+def check_congruence(dihedrals1,dihedrals2):
+    length1=calculate_lengths(dihedrals1)
+    length2=calculate_lengths(dihedrals2)
+    list_congruences=[]
+    for face1 in permutations([1,2,3,4], 3):
+        for face2 in permutations([1,2,3,4], 3):
+            if face1 != face2:
+                A1,B1,C1=face1
+                A2,B2,C2=face2
+                if length1[(A1,B1)]-length2[(A2,B2)]<1e-10:
+                    if length1[(A1,C1)]-length2[(A2,C2)]<1e-10:
+                        if length1[(B1, C1)]-length2[(B2,C2)]<1e-10:
+                            list_congruences.append((face1, face2))
+    return list_congruences   
+
+#The Follow section is a symbolically computational implementation of the first section's results of 
+#Wirth-Dreiding paper in J. Math Chem., which will be useful in transitioning form lengths to dihedral angles 
+#(although one can also directly reverse the process used in the first part of the code...)
+
+
+
+def WD_matrix(lengths):
+    D=Matrix([[0, lengths[0]**2, lengths[1]**2, lengths[2]**2, 1], 
+         [lengths[0]**2, 0, lengths[3]**2, lengths[4]**2, 1],
+         [lengths[1]**2, lengths[3]**2, 0, lengths[5]**2, 1],
+         [lengths[2]**2, lengths[4]**2,lengths[5]**2,0,1],
+         [1,1,1,1,0]])
+    return D
+
+
+def check_welldefined(lengths):
+    """
+    Parameters
+    List of Edgelengths [12,13,14,23,24,34]
+    
+    Returns:
+    True if the edge lengths define a non-degenerate tetrahedron
+    False Otherwise
+    """
+    D=WD_matrix(lengths)
+    if D.det()>0:
+        return True
+
+def find_welldefinedrange(lengths):
+    """
+    Parameters
+    lengths: List of Edgelengths [12,13,14,23,24,34]; one or more of which is a symbol (variable).
+    This can be initialized using x=symbols("x").
+    Returns:
+    Conditions for which the tetrahedron is non-degenerate. 
+    The reader must only take the positive edge lengths... 
+    (generally in the form of an inequality or a solution to it)
+    """
+    D=WD_matrix(lengths)
+    return solve(D.det()>0, domain='RR')         
+
+def D_3(i,j,k, lengths):
+    """
+    Parameters
+    lengths:List of Edgelengths [12,13,14,23,24,34]; one or more of which is a symbol (variable).
+    Distinct i,j,k in {1,2,3,4}
+    Returns:
+    D_ijk, as defined in WD's paper
+    """
+    l=complement(i, j, k)
+    M=WD_matrix(lengths)
+    M_new=M.copy()
+    M_new.col_del(l-1)
+    M_new.row_del(l-1)
+    return M_new.det()
+
+def D_2(i,j, lengths):
+    """
+    Parameters
+    lengths: List of Edgelengths [12,13,14,23,24,34]; one or more of which is a symbol (variable).
+    Distinct i,j in {1,2,3,4}
+    Returns:
+    D_ij, as defined in WD's paper
+    """
+    k,l=doublecomplement(i, j)
+    M=WD_matrix(lengths)
+    M_new=M.copy()
+    M_new.col_del(k-1)
+    M_new.row_del(l-1)
+    return (-1)**(k+l)*M_new.det()
+
+def lengths_to_dihedrals(lengths):
+    angles={}
+    for i in range(1,5):
+        for j in range(1,5):
+            if i!=j:
+                k,l=doublecomplement(i, j)
+                angles[(i,j)]=acos(D_2(i,j,lengths)/sqrt( D_3(i,j,k, lengths)* D_3(i,j,l, lengths)))
+                
+    return angles
+
+
+#TO RUN, USE THE FOLLOWING SECTION (AND CHANGE THE DIHEDRALS ANGLES, IF NECESSARY)
+#RECALL THAT THE ORDER IS 12,13,14,23,24,34
+#You can generate families of tetrahedra with rational angles, as in Theorem 1.8 of 
+#Professor Poonen's paper (http://math.mit.edu/~poonen/papers/space_vectors.pdf), using the two
+#family functions
+# x=symbols("x")
+# dihedrals=[S("acos(1/3)")]*6 #parantheses instruct Sympy to use the exact value
+# dihedrals=family1(x)
+dihedrals=[pi/7,pi/3,4*pi/7,4*pi/7, pi/3, 3*pi/7]
+# dihedrals=[pi/5, pi/3,pi/2, pi/2, pi-2*pi/5, pi/5]
+print("Congruences in Faces:", check_congruence(dihedrals, dihedrals))
+# planar=overall(dihedrals)
+# for i in planar: 
+#     print(i, simplify(planar[i]))
+# lengths=calculate_lengths(dihedrals)
+# for i in lengths:
+#     print(i, lengths[i])
+    
+
 
 
                     

@@ -275,19 +275,25 @@ def get_3d(planar):
     return ( tuple(pos[0]),tuple(pos[1]),position3, tuple(pos[2]))
 
 def check_congruence(dihedrals1,dihedrals2):
+    """
+    Parameters
+    Dihedral angles of both tetrahedra, both in the order [12,13,14,23,24,34]
+    
+    Returns:
+    All pairs of confruent faces F1, F2 such that F1 is on Tetrahedron 1, and F2 is on Tetrahedron 2
+    """
     length1=calculate_lengths(dihedrals1)
     length2=calculate_lengths(dihedrals2)
     list_congruences=[]
     for face1 in permutations([1,2,3,4], 3):
         for face2 in permutations([1,2,3,4], 3):
-            if face1 != face2:
-                A1,B1,C1=face1
-                A2,B2,C2=face2
-                if length1[(A1,B1)]-length2[(A2,B2)]<1e-10:
-                    if length1[(A1,C1)]-length2[(A2,C2)]<1e-10:
-                        if length1[(B1, C1)]-length2[(B2,C2)]<1e-10:
-                            list_congruences.append((face1, face2))
-    return list_congruences   
+            A1,B1,C1=face1
+            A2,B2,C2=face2
+            if abs(length1[(A1,B1)]-length2[(A2,B2)])<1e-10:
+                if abs(length1[(A1,C1)]-length2[(A2,C2)])<1e-10:
+                    if abs(length1[(B1, C1)]-length2[(B2,C2)])<1e-10:
+                        list_congruences.append((face1, face2))
+    return list_congruences  
 
 #The Follow section is a symbolically computational implementation of the first section's results of 
 #Wirth-Dreiding paper in J. Math Chem., which will be useful in transitioning form lengths to dihedral angles 
@@ -296,6 +302,13 @@ def check_congruence(dihedrals1,dihedrals2):
 
 
 def WD_matrix(lengths):
+        """
+    Parameters
+    List of Edgelengths [12,13,14,23,24,34]
+    
+    Returns:
+    The D matrix!
+    """
     D=Matrix([[0, lengths[0]**2, lengths[1]**2, lengths[2]**2, 1], 
          [lengths[0]**2, 0, lengths[3]**2, lengths[4]**2, 1],
          [lengths[1]**2, lengths[3]**2, 0, lengths[5]**2, 1],

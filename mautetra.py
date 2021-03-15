@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+
 # alias run="python3 -i ./AC-18.Tetra/mautetra.py"
 def find_Dmatrix(e12,e13,e14,e23,e24,e34):
   """Finds the D matrix described in Wirth-Dreiding from the given edge lengths"""
@@ -6,6 +8,13 @@ def find_Dmatrix(e12,e13,e14,e23,e24,e34):
   [e12**2,0,e23**2,e24**2,1],
   [e13**2,e23**2,0,e34**2,1],
   [e14**2,e24**2,e34**2,0,1],
+  [1,1,1,1,0]])
+  return D
+def find_Dunsquare(e12,e13,e14,e23,e24,e34):
+  D = np.array([[0,e12,e13,e14,1],
+  [e12,0,e23,e24,1],
+  [e13,e23,0,e34,1],
+  [e14,e24,e34,0,1],
   [1,1,1,1,0]])
   return D
 
@@ -74,23 +83,20 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
 def find_relation():
   """Given the D matrix, find the appropriate relations"""
   MAX_GUESSES = 0
-  EPS = 0.000001
-  MAX_INT_GUESS = 1000
+  EPS = 0.00001
+  MAX_INT_GUESS = 2**32 - 1
   prod = 0
   iterate = 0
-  def max_iter(iterate):
-    if MAX_GUESSES == 0:
-      return True
-    else:
-      return iterate < MAX_GUESSES
-  while max_iter(iterate):
+  while MAX_GUESSES == 0 or iterate < MAX_GUESSES:
     iterate += 1
+    if iterate % 1000 == 0:
+      print(iterate)
     edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
     if not check_tetra(*edges):
       continue
     prod = 1
     D = find_Dmatrix(*edges)
-    unsquareD = np.sqrt(D)
+    unsquareD = find_Dunsquare(*edges)
     for i in range(1,4):
       for j in range(i+1,5):
         notin = [h for h in range(1,5) if h not in [i,j]]
@@ -99,11 +105,15 @@ def find_relation():
         d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
         b = 4*d - 2
         w = (b+np.sqrt(complex(b**2-4)))/2
-        prod *= w**(unsquareD[i-1,j-1])
-    checksum = np.absolute(prod)
-    print(prod,checksum,np.absolute(prod-1),iterate)
-    if np.absolute(prod-1)<EPS:
-      return (edges,np.absolute(prod-1),prod,iterate)
+        prod *= w**(24*unsquareD[i-1,j-1])
+    imag_pos = prod.imag if prod.imag > 0 else -prod.imag
+    if imag_pos < EPS:
+      print(prod.imag)
+      original_stdout = sys.stdout
+      with open('5dimtetra.txt', 'a+') as f:
+        sys.stdout = f
+        print(edges,np.absolute(prod-1),prod,iterate)
+        sys.stdout = original_stdout
   return None
 
 

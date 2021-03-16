@@ -87,36 +87,33 @@ def find_relation():
   MAX_INT_GUESS = 2**32 - 1
   prod = 0
   iterate = 0
-  while MAX_GUESSES == 0 or iterate < MAX_GUESSES:
-    iterate += 1
-    if iterate % 1000 == 0:
-      print(iterate)
-    edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
-    if not check_tetra(*edges):
-      continue
-    prod = 1
-    D = find_Dmatrix(*edges)
-    unsquareD = find_Dunsquare(*edges)
-    for i in range(1,4):
-      for j in range(i+1,5):
-        notin = [h for h in range(1,5) if h not in [i,j]]
-        k = notin[0]
-        l = notin[1]
-        d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
-        b = 4*d - 2
-        w = (b+np.sqrt(complex(b**2-4)))/2
-        prod *= w**(24*unsquareD[i-1,j-1])
-    imag_pos = prod.imag if prod.imag > 0 else -prod.imag
-    if imag_pos < EPS:
-      print(prod.imag)
-      original_stdout = sys.stdout
-      with open('5dimtetra.txt', 'a+') as f:
-        sys.stdout = f
-        print(edges,np.absolute(prod-1),prod,iterate)
-        sys.stdout = original_stdout
+  try:
+    while MAX_GUESSES == 0 or iterate < MAX_GUESSES:
+        iterate += 1
+        edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
+        if not check_tetra(*edges):
+          continue
+        prod = 1
+        D = find_Dmatrix(*edges)
+        unsquareD = find_Dunsquare(*edges)
+        for i in range(1,4):
+          for j in range(i+1,5):
+            notin = [h for h in range(1,5) if h not in [i,j]]
+            k = notin[0]
+            l = notin[1]
+            d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+            b = 4*d - 2
+            w = (b+np.sqrt(complex(b**2-4)))/2
+            prod *= w**(24*unsquareD[i-1,j-1])
+        imag_pos = prod.imag if prod.imag > 0 else -prod.imag
+        if imag_pos < EPS:
+          original_stdout = sys.stdout
+          with open('5dimtetra.txt', 'a+') as f:
+            sys.stdout = f
+            print(edges,np.absolute(prod-1),prod,iterate)
+            sys.stdout = original_stdout
+  except KeyboardInterrupt:
+    print('\nEnded on iteration',iterate)
   return None
-
-
-testmat = find_Dmatrix(1,1,1,1,1,1)
-othertest = find_Dmatrix(1,2,1,2,1,2)
-value = find_relation()
+if __name__ == '__main__':
+  value = find_relation()

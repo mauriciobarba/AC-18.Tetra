@@ -85,7 +85,7 @@ def find_relation():
   """Given the D matrix, find the appropriate relations"""
   MAX_GUESSES = 0
   EPS = 0.00001
-  MAX_INT_GUESS = 2**32 - 1
+  MAX_INT_GUESS = 100
   prod = 0
   iterate = 0
   try:

@@ -83,6 +83,7 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
   return False
 def find_relation():
   """Given the D matrix, find the appropriate relations"""
+  # Constants
   MAX_GUESSES = 0
   EPS = 0.00001
   MAX_INT_GUESS = 100
@@ -107,7 +108,7 @@ def find_relation():
             w = (b+np.sqrt(complex(b**2-4)))/2
             prod *= w**(24*unsquareD[i-1,j-1])
         imag_pos = prod.imag if prod.imag > 0 else -prod.imag
-        if imag_pos < EPS:
+        if imag_pos < EPS and prod.real > 0:
           original_stdout = sys.stdout
           with open('5dimtetra.txt', 'a+') as f:
             sys.stdout = f

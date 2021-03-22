@@ -84,14 +84,11 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
 def find_relation():
   """Given the D matrix, find the appropriate relations"""
   # Constants
-  MAX_GUESSES = 0
-  EPS = 0.00001
+  EPS = 1e-10
   MAX_INT_GUESS = 100
   prod = 0
-  iterate = 0
   try:
-    while MAX_GUESSES == 0 or iterate < MAX_GUESSES:
-        iterate += 1
+    while True: 
         edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
         if not check_tetra(*edges):
           continue
@@ -112,10 +109,10 @@ def find_relation():
           original_stdout = sys.stdout
           with open('5dimtetra.txt', 'a+') as f:
             sys.stdout = f
-            print(edges,np.absolute(prod-1),prod,iterate)
+            print(edges,np.absolute(prod-1),prod)
             sys.stdout = original_stdout
   except KeyboardInterrupt:
-    print('\nEnded on iteration',iterate)
+    print('\nProcess Ended Successfully')
   return None
 if __name__ == '__main__':
   value = find_relation()

@@ -81,17 +81,15 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
   if det_condition and triple_face_condition:
     return True
   return False
+
 def find_relation():
   """Given the D matrix, find the appropriate relations"""
   # Constants
-  MAX_GUESSES = 0
   EPS = 0.00001
   MAX_INT_GUESS = 100
   prod = 0
-  iterate = 0
   try:
-    while MAX_GUESSES == 0 or iterate < MAX_GUESSES:
-        iterate += 1
+    while True:
         edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
         if not check_tetra(*edges):
           continue
@@ -112,10 +110,42 @@ def find_relation():
           original_stdout = sys.stdout
           with open('5dimtetra.txt', 'a+') as f:
             sys.stdout = f
-            print(edges,np.absolute(prod-1),prod,iterate)
+            print(edges,np.absolute(prod-1),prod)
             sys.stdout = original_stdout
   except KeyboardInterrupt:
-    print('\nEnded on iteration',iterate)
+    print('\nEnded Successfully')
   return None
+
+def get_cosines(e12,e13,e14,e23,e24,e34):
+  D = find_Dunsquare(e12,e13,e14,e23,e24,e34)
+  cos = np.zeros((5,5))
+  for i in range(1,4):
+    for j in range(i+1,5):
+      notin = [h for h in range(1,5) if h not in [i,j]]
+      k = notin[0]
+      l = notin[1]
+      cos[i,j] = D_ij(D,i,j)/np.sqrt(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+  return [cos[1,2],cos[1,3],cos[1,4],cos[2,3],cos[2,4],cos[3,4]]
+
+def check_result(e12,e13,e14,e23,e24,e34):
+  edges = [e12,e13,e14,e23,e24,e34]
+  if check_tetra(*edges):
+    print('this is a tetrahedron')
+  prod = 1
+  D = find_Dmatrix(*edges)
+  unsquareD = find_Dunsquare(*edges)
+  for i in range(1,4):
+    for j in range(i+1,5):
+      notin = [h for h in range(1,5) if h not in [i,j]]
+      k = notin[0]
+      l = notin[1]
+      d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+      b = 4*d - 2
+      w = (b+np.sqrt(complex(b**2-4)))/2
+      print('({},{}):'.format(i,j),'d value: ',d,'\tw value:',w)
+      prod *= w**(24*unsquareD[i-1,j-1])
+  print(prod)
+  return None
+  imag_pos = prod.imag if prod.imag > 0 else -prod.imag
 if __name__ == '__main__':
   value = find_relation()

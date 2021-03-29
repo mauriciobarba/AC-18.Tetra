@@ -85,11 +85,11 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
 def find_relation():
   """Given the D matrix, find the appropriate relations"""
   # Constants
-  EPS = 0.00001
+  EPS = 1e-10
   MAX_INT_GUESS = 100
   prod = 0
   try:
-    while True:
+    while True: 
         edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
         if not check_tetra(*edges):
           continue

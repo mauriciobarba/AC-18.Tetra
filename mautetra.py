@@ -81,31 +81,57 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
   if det_condition and triple_face_condition:
     return True
   return False
+
+def rwh_primes(n):
+    # https://stackoverflow.com/questions/2068372/fastest-way-to-list-all-primes-below-n-in-python/3035188#3035188
+    """ Returns  a list of primes < n """
+    sieve = [True] * n
+    for i in range(3,int(n**0.5)+1,2):
+        if sieve[i]:
+            sieve[i*i::2*i]=[False]*((n-i*i-1)//(2*i)+1)
+    return [2] + [i for i in range(3,n,2) if sieve[i]]
+
+def w_val_p(a,b,p):
+  """Gets the p-adic valuation of w. Needs some improvement."""
+  k1 = 1
+  while a % p**k1 == 0:
+    k1 += 1
+  k1 -= 1
+  k2 = 1
+  while b % p**k2 == 0:
+    k2 += 1
+  k2 -= 1
+  return k1 - k2
+
 def find_relation():
   """Given the D matrix, find the appropriate relations"""
   # Constants
   EPS = 1e-10
   MAX_INT_GUESS = 100
   prod = 0
+  MAX_PRIME = 100
+  primes = rwh_primes(MAX_PRIME)
   try:
     while True: 
         edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
         if not check_tetra(*edges):
           continue
-        prod = 1
         D = find_Dmatrix(*edges)
         unsquareD = find_Dunsquare(*edges)
-        for i in range(1,4):
-          for j in range(i+1,5):
-            notin = [h for h in range(1,5) if h not in [i,j]]
-            k = notin[0]
-            l = notin[1]
-            d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
-            b = 4*d - 2
-            w = (b+np.sqrt(complex(b**2-4)))/2
-            prod *= w**(24*unsquareD[i-1,j-1])
-        imag_pos = prod.imag if prod.imag > 0 else -prod.imag
-        if imag_pos < EPS and prod.real > 0:
+        always_zero = True
+        for p in primes:
+          s = 0
+          for i in range(1,4):
+            for j in range(i+1,5):
+              notin = [h for h in range(1,5) if h not in [i,j]]
+              k = notin[0]
+              l = notin[1]
+              b_num = 4*(D_ij(D,i,j))**2 - 2*(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+              b_denom = (D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+              s += w_val_p(b_num,b_denom,2)
+          if s != 0:
+            always_zero  = False
+        if always_zero:
           original_stdout = sys.stdout
           with open('5dimtetra.txt', 'a+') as f:
             sys.stdout = f

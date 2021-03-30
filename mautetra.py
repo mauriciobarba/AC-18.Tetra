@@ -101,7 +101,7 @@ def find_relation():
             notin = [h for h in range(1,5) if h not in [i,j]]
             k = notin[0]
             l = notin[1]
-            d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+            d = (round(D_ij(D,i,j)))**2/(round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
             b = 4*d - 2
             w = (b+np.sqrt(complex(b**2-4)))/2
             prod *= w**(24*unsquareD[i-1,j-1])
@@ -118,14 +118,21 @@ def find_relation():
 
 def get_cosines(e12,e13,e14,e23,e24,e34):
   D = find_Dunsquare(e12,e13,e14,e23,e24,e34)
-  cos = np.zeros((5,5))
+  cos = [[0 for _ in range(0,5)] for _ in range(0,5)]
   for i in range(1,4):
     for j in range(i+1,5):
       notin = [h for h in range(1,5) if h not in [i,j]]
       k = notin[0]
       l = notin[1]
-      cos[i,j] = D_ij(D,i,j)/np.sqrt(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
-  return [cos[1,2],cos[1,3],cos[1,4],cos[2,3],cos[2,4],cos[3,4]]
+      cos[i][j] = (round(D_ij(D,i,j)),round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
+  return [
+    '{}/\u221A1{}'.format(*cos[1][2]),
+    '{}/\u221A1{}'.format(*cos[1][3]),
+    '{}/\u221A1{}'.format(*cos[1][4]),
+    '{}/\u221A1{}'.format(*cos[2][3]),
+    '{}/\u221A1{}'.format(*cos[2][4]),
+    '{}/\u221A1{}'.format(*cos[3][4])
+    ]
 
 def check_result(e12,e13,e14,e23,e24,e34):
   edges = [e12,e13,e14,e23,e24,e34]
@@ -139,7 +146,7 @@ def check_result(e12,e13,e14,e23,e24,e34):
       notin = [h for h in range(1,5) if h not in [i,j]]
       k = notin[0]
       l = notin[1]
-      d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+      d = (round(D_ij(D,i,j)))**2/(round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
       b = 4*d - 2
       w = (b+np.sqrt(complex(b**2-4)))/2
       print('({},{}):'.format(i,j),'d value: ',d,'\tw value:',w)

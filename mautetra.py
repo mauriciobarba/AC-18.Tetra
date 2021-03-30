@@ -126,8 +126,8 @@ def find_relation():
               notin = [h for h in range(1,5) if h not in [i,j]]
               k = notin[0]
               l = notin[1]
-              b_num = 4*(D_ij(D,i,j))**2 - 2*(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
-              b_denom = (D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+              b_num = 4*(round(D_ij(D,i,j)))**2 - 2*(round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
+              b_denom = (round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
               s += w_val_p(b_num,b_denom,2)
           if s != 0:
             always_zero  = False
@@ -138,7 +138,46 @@ def find_relation():
             print(edges,np.absolute(prod-1),prod)
             sys.stdout = original_stdout
   except KeyboardInterrupt:
-    print('\nProcess Ended Successfully')
+    print('\nEnded Successfully')
   return None
+
+def get_cosines(e12,e13,e14,e23,e24,e34):
+  D = find_Dunsquare(e12,e13,e14,e23,e24,e34)
+  cos = [[0 for _ in range(0,5)] for _ in range(0,5)]
+  for i in range(1,4):
+    for j in range(i+1,5):
+      notin = [h for h in range(1,5) if h not in [i,j]]
+      k = notin[0]
+      l = notin[1]
+      cos[i][j] = (round(D_ij(D,i,j)),round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
+  return [
+    '{}/\u221A1{}'.format(*cos[1][2]),
+    '{}/\u221A1{}'.format(*cos[1][3]),
+    '{}/\u221A1{}'.format(*cos[1][4]),
+    '{}/\u221A1{}'.format(*cos[2][3]),
+    '{}/\u221A1{}'.format(*cos[2][4]),
+    '{}/\u221A1{}'.format(*cos[3][4])
+    ]
+
+def check_result(e12,e13,e14,e23,e24,e34):
+  edges = [e12,e13,e14,e23,e24,e34]
+  if check_tetra(*edges):
+    print('this is a tetrahedron')
+  prod = 1
+  D = find_Dmatrix(*edges)
+  unsquareD = find_Dunsquare(*edges)
+  for i in range(1,4):
+    for j in range(i+1,5):
+      notin = [h for h in range(1,5) if h not in [i,j]]
+      k = notin[0]
+      l = notin[1]
+      d = (round(D_ij(D,i,j)))**2/(round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
+      b = 4*d - 2
+      w = (b+np.sqrt(complex(b**2-4)))/2
+      print('({},{}):'.format(i,j),'d value: ',d,'\tw value:',w)
+      prod *= w**(24*unsquareD[i-1,j-1])
+  print(prod)
+  return None
+  imag_pos = prod.imag if prod.imag > 0 else -prod.imag
 if __name__ == '__main__':
   value = find_relation()

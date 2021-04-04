@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import sys
+import math
 
 # alias run="python3 -i ./AC-18.Tetra/mautetra.py"
 def find_Dmatrix(e12,e13,e14,e23,e24,e34):
@@ -11,6 +12,7 @@ def find_Dmatrix(e12,e13,e14,e23,e24,e34):
   [e14**2,e24**2,e34**2,0,1],
   [1,1,1,1,0]])
   return D
+
 def find_Dunsquare(e12,e13,e14,e23,e24,e34):
   D = np.array([[0,e12,e13,e14,1],
   [e12,0,e23,e24,1],
@@ -36,7 +38,7 @@ def D_ijk(D,i,j,k):
     raise Exception('i,j,k must be all distinct')
   l = [h for h in range(1,5) if h not in [i,j,k]][0]
   bigmat = minor(D,l,l)
-  result = np.linalg.det(bigmat)
+  result = round(np.linalg.det(bigmat))
   return result
 
 def D_ij(D,i,j):
@@ -55,19 +57,17 @@ def D_ij(D,i,j):
   else:
     sign = -1
   bigmat = sign * minor(D,k,l)
-  result = np.linalg.det(bigmat)
+  result = round(np.linalg.det(bigmat))
   return result
 
 def check_tetra(e12,e13,e14,e23,e24,e34):
-  """Checks this sextuple can determine a tetrahedron by
-  lemma 4 of Wirth-Dreiding. This lemma is not a
-  sufficiency"""
+  """Checks whether this sextuple describes a tetrahedron. If and only if"""
   D = find_Dmatrix(e12,e13,e14,e23,e24,e34)
-  if np.linalg.det(D) > 0:
+  if round(np.linalg.det(D)) > 0:
     det_condition = True
   else:
     det_condition = False
-  unsquareD = np.sqrt(D)
+  unsquareD = find_Dunsquare(*edges)
   possible_triangles = [(1,2,3),(1,2,4),(1,3,4),(2,3,4)]
   triple_face_condition = False
   for tup in possible_triangles:
@@ -81,15 +81,6 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
   if det_condition and triple_face_condition:
     return True
   return False
-
-def rwh_primes(n):
-    # https://stackoverflow.com/questions/2068372/fastest-way-to-list-all-primes-below-n-in-python/3035188#3035188
-    """ Returns  a list of primes < n """
-    sieve = [True] * n
-    for i in range(3,int(n**0.5)+1,2):
-        if sieve[i]:
-            sieve[i*i::2*i]=[False]*((n-i*i-1)//(2*i)+1)
-    return [2] + [i for i in range(3,n,2) if sieve[i]]
 
 def w_val_p(a,b,p):
   """Gets the p-adic valuation of w. Needs some improvement."""
@@ -113,35 +104,35 @@ def find_relation():
   primes = rwh_primes(MAX_PRIME)
   try:
     while True: 
-        edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
-        if not check_tetra(*edges):
-          continue
-        D = find_Dmatrix(*edges)
-        unsquareD = find_Dunsquare(*edges)
-        always_zero = True
-        for p in primes:
-          s = 0
-          for i in range(1,4):
-            for j in range(i+1,5):
-              notin = [h for h in range(1,5) if h not in [i,j]]
-              k = notin[0]
-              l = notin[1]
-              b_num = 4*(round(D_ij(D,i,j)))**2 - 2*(round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
-              b_denom = (round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
-              s += w_val_p(b_num,b_denom,2)
-          if s != 0:
-            always_zero  = False
-        if always_zero:
-          original_stdout = sys.stdout
-          with open('5dimtetra.txt', 'a+') as f:
-            sys.stdout = f
-            print(edges,np.absolute(prod-1),prod)
-            sys.stdout = original_stdout
+      edges = np.random.randint(1,MAX_INT_GUESS,(1,6)).tolist()[0]
+      if not check_tetra(*edges):
+        continue
+      D = find_Dmatrix(*edges)
+      unsquareD = find_Dunsquare(*edges)
+      always_zero = True
+      for p in primes:
+        s = 0
+        for i in range(1,4):
+          for j in range(i+1,5):
+            notin = [h for h in range(1,5) if h not in [i,j]]
+            k = notin[0]
+            l = notin[1]
+            b_num = 4*(D_ij(D,i,j))**2 - 2*(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+            b_denom = (D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
+            s += w_val_p(b_num,b_denom,2)
+        if s != 0:
+          always_zero  = False
+      if always_zero:
+        original_stdout = sys.stdout
+        with open('5dimtetra.txt', 'a+') as f:
+          sys.stdout = f
+          print(edges,np.absolute(prod-1),prod)
+          sys.stdout = original_stdout
   except KeyboardInterrupt:
     print('\nEnded Successfully')
   return None
 
-def get_cosines(e12,e13,e14,e23,e24,e34):
+def get_square_cosines(e12,e13,e14,e23,e24,e34):
   D = find_Dunsquare(e12,e13,e14,e23,e24,e34)
   cos = [[0 for _ in range(0,5)] for _ in range(0,5)]
   for i in range(1,4):
@@ -149,20 +140,22 @@ def get_cosines(e12,e13,e14,e23,e24,e34):
       notin = [h for h in range(1,5) if h not in [i,j]]
       k = notin[0]
       l = notin[1]
-      cos[i][j] = (round(D_ij(D,i,j)),round(D_ijk(D,i,j,k)*D_ijk(D,i,j,l)))
+      cos[i][j] = (D_ij(D,i,j),D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
   return [
-    '{}/\u221A1{}'.format(*cos[1][2]),
-    '{}/\u221A1{}'.format(*cos[1][3]),
-    '{}/\u221A1{}'.format(*cos[1][4]),
-    '{}/\u221A1{}'.format(*cos[2][3]),
-    '{}/\u221A1{}'.format(*cos[2][4]),
-    '{}/\u221A1{}'.format(*cos[3][4])
+    '{}/{}'.format(cos[1][2][0]**2,cos[1][2][1]),
+    '{}/{}'.format(cos[1][3][0]**2,cos[1][3][1]),
+    '{}/{}'.format(cos[1][4][0]**2,cos[1][4][1]),
+    '{}/{}'.format(cos[2][3][0]**2,cos[2][3][1]),
+    '{}/{}'.format(cos[2][4][0]**2,cos[2][4][1]),
+    '{}/{}'.format(cos[3][4][0]**2,cos[3][4][1])
     ]
 
 def check_result(e12,e13,e14,e23,e24,e34):
   edges = [e12,e13,e14,e23,e24,e34]
   if check_tetra(*edges):
     print('this is a tetrahedron')
+  else:
+    print('this is not a tetrahedron')
   prod = 1
   D = find_Dmatrix(*edges)
   unsquareD = find_Dunsquare(*edges)

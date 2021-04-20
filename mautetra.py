@@ -103,7 +103,6 @@ def one_combination_matrix(n):
   return result
 
 
-
 def get_coeff(e12,e13,e14,e23,e24,e34):
   """Gets the squared cosine according to Wirth Dreiding"""
   D = find_Dunsquare(e12,e13,e14,e23,e24,e34)
@@ -133,12 +132,13 @@ def get_prime_factors(number):
       prime_factors.append(int(i))
       number = number / i
   if number > 2:
-    prime_factors.append(int(number))
+    prime_factors.append(int(number)) 
+
   return prime_factors
 
 def get_poly_coeffs_denom(e12,e13,e14,e23,e24,e34):
   """Gets the squared cosine according to Wirth Dreiding. Not quite the square but the coefficient of the polynomial"""
-  D = find_Dunsquare(e12,e13,e14,e23,e24,e34)
+  D = find_Dmatrix(e12,e13,e14,e23,e24,e34)
   cos = [[0 for _ in range(0,5)] for _ in range(0,5)]
   for i in range(1,4):
     for j in range(i+1,5):
@@ -157,10 +157,10 @@ def get_poly_coeffs_denom(e12,e13,e14,e23,e24,e34):
 
 def check_result_p_adic(e12,e13,e14,e23,e24,e34):
   edges = [e12,e13,e14,e23,e24,e34]
+  print(edges)
   set_o_primes = set({})
-
   if not check_tetra(*edges):
-    return False
+    return None
   D = find_Dmatrix(*edges)
   unsquareD = find_Dunsquare(*edges)
   poly_coeffs = get_poly_coeffs_denom(*edges)
@@ -196,21 +196,16 @@ def check_result_p_adic(e12,e13,e14,e23,e24,e34):
       val_arr = np.vstack((val_arr,np.array([[w_val_p(poly_coeffs[5],p)]])))
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[5]]])))
       num_edges += 1
-    print(val_arr)
-    print(one_combination_matrix(num_edges)*(val_arr.T),filtered_edges)
-    print((one_combination_matrix(num_edges)*(val_arr.T))@filtered_edges)
     if not np.any((one_combination_matrix(num_edges)*(val_arr.T))@filtered_edges==0):
-      return False
-  return True
-
+      return None
+  return edges
 
 def check_result_numerical(e12,e13,e14,e23,e24,e34):
   """Checks if the edges we furnished actually make a tetrahedron"""
+  EPS = 1e-10
   edges = [e12,e13,e14,e23,e24,e34]
-  if check_tetra(*edges):
-    print('this is a tetrahedron')
-  else:
-    print('this is not a tetrahedron')
+  if not check_tetra(*edges):
+    return None
   prod = 1
   D = find_Dmatrix(*edges)
   unsquareD = find_Dunsquare(*edges)
@@ -222,10 +217,43 @@ def check_result_numerical(e12,e13,e14,e23,e24,e34):
       d = (D_ij(D,i,j))**2/(D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
       b = 4*d - 2
       w = (b+np.sqrt(complex(b**2-4)))/2
-      print('({},{}):'.format(i,j),'d value: ',d,'\tw value:',w)
       prod *= w**(24*unsquareD[i-1,j-1])
-  print(prod)
-  return None
+  print(edges, prod)
   imag_pos = prod.imag if prod.imag > 0 else -prod.imag
+  if imag_pos < EPS and prod.real > 0:
+    return edges
+  return None
+
+def iterate_edges(form):
+  """
+  Checks if edge lengths satisfy the property using numerical
+  or p-adic analysis. Numerical: form='numerical', p-adic: form='p-adic'.
+  """
+  EPS = 1e-10
+  MAX_EDGE_GUESS = 100
+  try:
+    while True:
+      edges = np.random.randint(1,MAX_EDGE_GUESS,(1,6)).tolist()[0]
+      if form == 'numerical':
+        result = check_result_numerical(*edges)
+        original_stdout = sys.stdout
+        with open('tetranumerical.txt', 'a+') as f:
+          sys.stdout = f
+          if not result is None:
+            print(result)
+          sys.stdout = original_stdout
+      elif form == 'p-adic':
+        result = check_result_p_adic(*edges)
+        original_stdout = sys.stdout
+        with open('tetrapadic.txt', 'a+') as f:
+          sys.stdout = f
+          if not result is None:
+            print(result)
+          sys.stdout = original_stdout
+      else:
+        raise Exception('Not a valid form')
+  except KeyboardInterrupt:
+    print('\nEnded Successfully')
+
 if __name__ == '__main__':
-  pass
+  iterate_edges('p-adic')

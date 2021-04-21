@@ -139,7 +139,10 @@ def get_poly_coeffs_denom(e12,e13,e14,e23,e24,e34):
 def check_result_p_adic(e12,e13,e14,e23,e24,e34, verbose = False):
   """Check if a list of lengths determines a tetrahedron and if the edges span a 5 dim vector space using p-adic analysis"""
   edges = [e12,e13,e14,e23,e24,e34]
+<<<<<<< HEAD
 
+=======
+>>>>>>> f8e045a819d1d28fd4d44d41a0df003f78a1040b
   set_o_primes = set({})
   if not check_tetra(*edges):
     return None
@@ -253,7 +256,6 @@ def iterate_edges(form, verbose = False):
         with open('tetranumerical.txt', 'a+') as f:
           sys.stdout = f
           if not result is None:
-            print(result)
           sys.stdout = original_stdout
       elif form == 'p-adic':
         result = check_result_p_adic(*edges, verbose)

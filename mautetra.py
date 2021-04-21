@@ -73,9 +73,9 @@ def check_tetra(e12,e13,e14,e23,e24,e34):
   possible_triangles = [(1,2,3),(1,2,4),(1,3,4),(2,3,4)]
   triple_face_condition = False
   for tup in possible_triangles:
-    inequality1 = unsquareD[tup[0],tup[1]] < unsquareD[tup[1],tup[2]]+unsquareD[tup[0],tup[2]]
-    inequality2 = unsquareD[tup[1],tup[2]] < unsquareD[tup[0],tup[1]]+unsquareD[tup[0],tup[2]]
-    inequality3 = unsquareD[tup[0],tup[2]] < unsquareD[tup[1],tup[2]]+unsquareD[tup[0],tup[1]]
+    inequality1 = unsquareD[tup[0]-1,tup[1]-1] < unsquareD[tup[1]-1,tup[2]-1]+unsquareD[tup[0]-1,tup[2]-1]
+    inequality2 = unsquareD[tup[1]-1,tup[2]-1] < unsquareD[tup[0]-1,tup[1]-1]+unsquareD[tup[0]-1,tup[2]-1]
+    inequality3 = unsquareD[tup[0]-1,tup[2]-1] < unsquareD[tup[1]-1,tup[2]-1]+unsquareD[tup[0]-1,tup[1]-1]
     total_truth = inequality1 and inequality2 and inequality3
     if total_truth:
       triple_face_condition = True
@@ -102,25 +102,6 @@ def one_combination_matrix(n):
     result = np.vstack((result,newarr))
   return result
 
-
-def get_coeff(e12,e13,e14,e23,e24,e34):
-  """Gets the squared cosine according to Wirth Dreiding"""
-  D = find_Dunsquare(e12,e13,e14,e23,e24,e34)
-  cos = [[0 for _ in range(0,5)] for _ in range(0,5)]
-  for i in range(1,4):
-    for j in range(i+1,5):
-      notin = [h for h in range(1,5) if h not in [i,j]]
-      k = notin[0]
-      l = notin[1]
-      cos[i][j] = (D_ij(D,i,j),D_ijk(D,i,j,k)*D_ijk(D,i,j,l))
-  return [
-    '{}/{}'.format(cos[1][2][0]**2//gcd(cos[1][2][0]**2,cos[1][2][1]),cos[1][2][1]//gcd(cos[1][2][0]**2,cos[1][2][1])),
-    '{}/{}'.format(cos[1][3][0]**2//gcd(cos[1][3][0]**2,cos[1][3][1]),cos[1][3][1]//gcd(cos[1][3][0]**2,cos[1][3][1])),
-    '{}/{}'.format(cos[1][4][0]**2//gcd(cos[1][4][0]**2,cos[1][4][1]),cos[1][4][1]//gcd(cos[1][4][0]**2,cos[1][4][1])),
-    '{}/{}'.format(cos[2][3][0]**2//gcd(cos[2][3][0]**2,cos[2][3][1]),cos[2][3][1]//gcd(cos[2][3][0]**2,cos[2][3][1])),
-    '{}/{}'.format(cos[2][4][0]**2//gcd(cos[2][4][0]**2,cos[2][4][1]),cos[2][4][1]//gcd(cos[2][4][0]**2,cos[2][4][1])),
-    '{}/{}'.format(cos[3][4][0]**2//gcd(cos[3][4][0]**2,cos[3][4][1]),cos[3][4][1]//gcd(cos[3][4][0]**2,cos[3][4][1]))
-    ]
 
 def get_prime_factors(number):
   prime_factors = []
@@ -155,53 +136,83 @@ def get_poly_coeffs_denom(e12,e13,e14,e23,e24,e34):
     cos[3][4][1]//gcd(4*cos[3][4][0]**2,cos[3][4][1])
     ]
 
-def check_result_p_adic(e12,e13,e14,e23,e24,e34):
+def check_result_p_adic(e12,e13,e14,e23,e24,e34, verbose = False):
+  """Check if a list of lengths determines a tetrahedron and if the edges span a 5 dim vector space using p-adic analysis"""
   edges = [e12,e13,e14,e23,e24,e34]
-  print(edges)
+
   set_o_primes = set({})
   if not check_tetra(*edges):
     return None
   D = find_Dmatrix(*edges)
-  unsquareD = find_Dunsquare(*edges)
   poly_coeffs = get_poly_coeffs_denom(*edges)
   for coeff in poly_coeffs:
     for p in get_prime_factors(coeff):
       set_o_primes.add(p)
-  print(set_o_primes)
+  table_rows = {}
+  for p in set_o_primes:
+    table_rows[p] = []
+
+  primes_passed = 0
   for p in set_o_primes:
     val_arr = np.zeros((0,1))
     filtered_edges = np.zeros((0,1))
     num_edges = 0
-    if w_val_p(poly_coeffs[0],p)>0:
+
+    pval = w_val_p(poly_coeffs[0],p)
+    table_rows[p].append(pval)
+    if pval>0:
       val_arr = np.vstack((val_arr,np.array([[w_val_p(poly_coeffs[0],p)]])))
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[0]]])))
       num_edges += 1
-    if w_val_p(poly_coeffs[1],p)>0:
+
+    pval = w_val_p(poly_coeffs[1],p)
+    table_rows[p].append(pval)
+    if pval>0:
       val_arr = np.vstack((val_arr,np.array([[w_val_p(poly_coeffs[1],p)]])))
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[1]]])))
       num_edges += 1
-    if w_val_p(poly_coeffs[2],p)>0:
+  
+    pval = w_val_p(poly_coeffs[2],p)
+    table_rows[p].append(pval)
+    if pval>0:
       val_arr = np.vstack((val_arr,np.array([[w_val_p(poly_coeffs[2],p)]])))
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[2]]])))
       num_edges += 1
-    if w_val_p(poly_coeffs[3],p)>0:
+    
+    pval = w_val_p(poly_coeffs[3],p)
+    table_rows[p].append(pval)
+    if pval>0:
       val_arr = np.vstack((val_arr,np.array([[w_val_p(poly_coeffs[3],p)]])))
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[3]]])))
       num_edges += 1
-    if w_val_p(poly_coeffs[4],p)>0:
+
+    pval = w_val_p(poly_coeffs[4],p)
+    table_rows[p].append(pval)
+    if pval>0:
       val_arr = np.vstack((val_arr,np.array([[w_val_p(poly_coeffs[4],p)]])))
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[4]]])))
       num_edges += 1
-    if w_val_p(poly_coeffs[5],p)>0:
+
+    pval = w_val_p(poly_coeffs[5],p)
+    table_rows[p].append(pval)
+    if pval>0:
       val_arr = np.vstack((val_arr,np.array([[w_val_p(poly_coeffs[5],p)]])))
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[5]]])))
       num_edges += 1
-    if not np.any((one_combination_matrix(num_edges)*(val_arr.T))@filtered_edges==0):
-      return None
+    if np.any((one_combination_matrix(num_edges)*(val_arr.T))@filtered_edges==0):
+      primes_passed += 1
+  if verbose:
+    print(edges)
+    print(poly_coeffs)
+    for k, v in table_rows.items():
+      print(k,v)
+    print('primes passed:',primes_passed)
+  if primes_passed < len(set_o_primes):
+    return None
   return edges
 
-def check_result_numerical(e12,e13,e14,e23,e24,e34):
-  """Checks if the edges we furnished actually make a tetrahedron"""
+def check_result_numerical(e12,e13,e14,e23,e24,e34, verbose = False):
+  """Check if a list of lengths determines a tetrahedron and if the edges span a 5 dim vector space using numerical methods"""
   EPS = 1e-10
   edges = [e12,e13,e14,e23,e24,e34]
   if not check_tetra(*edges):
@@ -218,13 +229,15 @@ def check_result_numerical(e12,e13,e14,e23,e24,e34):
       b = 4*d - 2
       w = (b+np.sqrt(complex(b**2-4)))/2
       prod *= w**(24*unsquareD[i-1,j-1])
-  print(edges, prod)
+  if verbose:
+    print(edges)
+    print(prod)
   imag_pos = prod.imag if prod.imag > 0 else -prod.imag
   if imag_pos < EPS and prod.real > 0:
     return edges
   return None
 
-def iterate_edges(form):
+def iterate_edges(form, verbose = False):
   """
   Checks if edge lengths satisfy the property using numerical
   or p-adic analysis. Numerical: form='numerical', p-adic: form='p-adic'.
@@ -235,7 +248,7 @@ def iterate_edges(form):
     while True:
       edges = np.random.randint(1,MAX_EDGE_GUESS,(1,6)).tolist()[0]
       if form == 'numerical':
-        result = check_result_numerical(*edges)
+        result = check_result_numerical(*edges, verbose)
         original_stdout = sys.stdout
         with open('tetranumerical.txt', 'a+') as f:
           sys.stdout = f
@@ -243,7 +256,7 @@ def iterate_edges(form):
             print(result)
           sys.stdout = original_stdout
       elif form == 'p-adic':
-        result = check_result_p_adic(*edges)
+        result = check_result_p_adic(*edges, verbose)
         original_stdout = sys.stdout
         with open('tetrapadic.txt', 'a+') as f:
           sys.stdout = f
@@ -256,4 +269,4 @@ def iterate_edges(form):
     print('\nEnded Successfully')
 
 if __name__ == '__main__':
-  iterate_edges('p-adic')
+  iterate_edges('p-adic', verbose = True)

@@ -252,7 +252,8 @@ def iterate_edges(form, verbose = False):
         with open('tetranumerical.txt', 'a+') as f:
           sys.stdout = f
           if not result is None:
-            sys.stdout = original_stdout
+            print(result)
+          sys.stdout = original_stdout
       elif form == 'p-adic':
         result = check_result_p_adic(*edges, verbose)
         original_stdout = sys.stdout
@@ -267,4 +268,4 @@ def iterate_edges(form, verbose = False):
     print('\nEnded Successfully')
 
 if __name__ == '__main__':
-  iterate_edges('p-adic', verbose = True)
+  iterate_edges('numerical', verbose = True)

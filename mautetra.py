@@ -157,7 +157,6 @@ def get_poly_coeffs_denom(e12,e13,e14,e23,e24,e34):
 
 def check_result_p_adic(e12,e13,e14,e23,e24,e34):
   edges = [e12,e13,e14,e23,e24,e34]
-  print(edges)
   set_o_primes = set({})
   if not check_tetra(*edges):
     return None
@@ -218,7 +217,6 @@ def check_result_numerical(e12,e13,e14,e23,e24,e34):
       b = 4*d - 2
       w = (b+np.sqrt(complex(b**2-4)))/2
       prod *= w**(24*unsquareD[i-1,j-1])
-  print(edges, prod)
   imag_pos = prod.imag if prod.imag > 0 else -prod.imag
   if imag_pos < EPS and prod.real > 0:
     return edges
@@ -240,7 +238,6 @@ def iterate_edges(form):
         with open('tetranumerical.txt', 'a+') as f:
           sys.stdout = f
           if not result is None:
-            print(result)
           sys.stdout = original_stdout
       elif form == 'p-adic':
         result = check_result_p_adic(*edges)

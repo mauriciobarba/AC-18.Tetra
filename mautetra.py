@@ -145,13 +145,12 @@ def check_result_p_adic(e12,e13,e14,e23,e24,e34, verbose = False):
   D = find_Dmatrix(*edges)
   poly_coeffs = get_poly_coeffs_denom(*edges)
   for coeff in poly_coeffs:
-    for p in get_prime_factors(coeff):
-      set_o_primes.add(p)
+    set_o_primes |= get_prime_factors(coeff)
   table_rows = {}
   for p in set_o_primes:
     table_rows[p] = []
 
-  primes_passed = 0
+  primes_passed = set({})
   for p in set_o_primes:
     val_arr = np.zeros((0,1))
     filtered_edges = np.zeros((0,1))
@@ -199,14 +198,14 @@ def check_result_p_adic(e12,e13,e14,e23,e24,e34, verbose = False):
       filtered_edges = np.vstack((filtered_edges,np.array([[edges[5]]])))
       num_edges += 1
     if np.any((one_combination_matrix(num_edges)*(val_arr.T))@filtered_edges==0):
-      primes_passed += 1
+      primes_passed.add(p)
   if verbose:
     print(edges)
     print(poly_coeffs)
     for k, v in table_rows.items():
       print(k,v)
     print('primes passed:',primes_passed)
-  if primes_passed < len(set_o_primes):
+  if primes_passed == set_o_primes:
     return None
   return edges
 

@@ -210,7 +210,8 @@ def check_result_p_adic(e12,e13,e14,e23,e24,e34, verbose = False):
   return edges
 
 def check_result_numerical(e12,e13,e14,e23,e24,e34, verbose = False):
-  """Check if a list of lengths determines a tetrahedron and if the edges span a 5 dim vector space using numerical methods"""
+  """Check if a list of lengths determines a tetrahedron and if 
+  the edges span a 5 dim vector space using numerical methods"""
   EPS = 1e-10
   edges = [e12,e13,e14,e23,e24,e34]
   if not check_tetra(*edges):

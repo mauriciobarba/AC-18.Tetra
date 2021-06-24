@@ -1,0 +1,377 @@
+\RequirePackage[l2tabu, orthodox]{nag} % This gives you warnings if you use obsolete LaTeX commands.
+\documentclass[12pt,reqno]{amsart}
+\usepackage{fullpage,amssymb,amsbsy,url,enumerate,color,comment,colonequals,graphicx,ifthen,mathrsfs,stmaryrd,bm}
+\usepackage[all]{xy}
+\usepackage[ruled, linesnumbered]{algorithm2e}
+
+% Color!
+\usepackage[dvipsnames,xcdraw,hyperref]{xcolor}
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\newcommand{\green}[1]{{\color{darkgreen} #1}}
+\newcommand{\blue}[1]{{\color{blue} #1}}
+\newcommand{\red}[1]{{\color{red} #1}}
+\newcommand{\magenta}[1]{{\color{magenta} #1}}
+\newcommand{\violet}[1]{{\color{violet} #1}}
+
+\newcommand{\defi}[1]{\textsf{\color{blue} #1}} % for defined terms
+
+% Characters
+\newcommand{\Aff}{\mathbb{A}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\G}{\mathbb{G}}
+\newcommand{\bbH}{\mathbb{H}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Sphere}{\mathbb{S}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Qbar}{{\overline{\Q}}}
+\newcommand{\Zhat}{{\widehat{\Z}}}
+\newcommand{\Zbar}{{\overline{\Z}}}
+\newcommand{\kbar}{{\overline{k}}}
+\newcommand{\Kbar}{{\overline{K}}}
+\newcommand{\Fbar}{{\overline{\F}}}
+
+\newcommand{\boldmu}{\bm{\mu}}
+\newcommand{\boldalpha}{\bm{\alpha}}
+
+\newcommand{\ii}{\mathbf{i}}
+\newcommand{\jj}{\mathbf{j}}
+\newcommand{\kk}{\mathbf{k}}
+
+\newcommand{\pp}{\mathfrak{p}}
+\newcommand{\mm}{\mathfrak{m}}
+
+% mathcal characters
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calE}{\mathcal{E}}
+\newcommand{\calF}{\mathcal{F}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\calI}{\mathcal{I}}
+\newcommand{\calJ}{\mathcal{J}}
+\newcommand{\calK}{\mathcal{K}}
+\newcommand{\calL}{\mathcal{L}}
+\newcommand{\calM}{\mathcal{M}}
+\newcommand{\calN}{\mathcal{N}}
+\newcommand{\calO}{\mathcal{O}}
+\newcommand{\calP}{\mathcal{P}}
+\newcommand{\calQ}{\mathcal{Q}}
+\newcommand{\calR}{\mathcal{R}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calT}{\mathcal{T}}
+\newcommand{\calU}{\mathcal{U}}
+\newcommand{\calV}{\mathcal{V}}
+\newcommand{\calW}{\mathcal{W}}
+\newcommand{\calX}{\mathcal{X}}
+\newcommand{\calY}{\mathcal{Y}}
+\newcommand{\calZ}{\mathcal{Z}}
+
+\newcommand{\CC}{\mathscr{C}}
+\newcommand{\FF}{\mathscr{F}}
+\newcommand{\GG}{\mathscr{G}}
+\newcommand{\scriptH}{\mathscr{H}}
+\newcommand{\II}{\mathscr{I}}
+\newcommand{\JJ}{\mathscr{J}}
+\newcommand{\KK}{\mathscr{K}}
+\newcommand{\LL}{\mathscr{L}}
+\newcommand{\OO}{\mathscr{O}}
+\newcommand{\XX}{\mathscr{X}}
+\newcommand{\ZZ}{\mathscr{Z}}
+
+% various math expressions that shouldn't be italicized 
+\DeclareMathOperator{\cis}{cis}
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator*{\lcm}{lcm}
+\DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\Ker}{Ker}
+\DeclareMathOperator{\Bin}{Bin}
+\DeclareMathOperator{\res}{res}
+\DeclareMathOperator{\rad}{rad}
+\DeclareMathOperator{\Spec}{Spec}
+
+\newcommand{\Cech}{\v{C}ech}
+\newcommand{\del}{\partial}
+\newcommand{\directsum}{\oplus} % binary direct sum
+\newcommand{\Directsum}{\bigoplus} % direct sum of a collection
+\newcommand{\injects}{\hookrightarrow}
+\newcommand{\intersect}{\cap} % binary intersection
+\newcommand{\Intersection}{\bigcap} % intersection of a collection
+\newcommand{\isom}{\simeq}
+\newcommand{\HH}{{\operatorname{H}}}
+\newcommand{\HHcech}{{\check{\HH}}}
+\newcommand{\HHat}{{\hat{\HH}}}
+\newcommand{\notdiv}{\nmid}
+\newcommand{\surjects}{\twoheadrightarrow}
+\newcommand{\tensor}{\otimes} % binary tensor product
+\newcommand{\Tensor}{\bigotimes} % tensor product of a collection
+\newcommand{\To}{\longrightarrow}
+\newcommand{\union}{\cup} % binary union
+\newcommand{\Union}{\bigcup} % union of a collection
+
+%Mau's
+\newcommand{\ra}[1][]{\xrightarrow{#1}}
+\newcommand{\f}[2]{\frac{#1}{#2}}
+\DeclareMathOperator{\id}{id}
+\newcommand{\be}{\mathbf{e}}
+\newcommand{\bd}{\mathbf{d}}
+\newcommand{\eps}{\varepsilon}
+\DeclareMathOperator{\Stab}{Stab}
+\DeclareMathOperator{\Span}{Span}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\sgn}{sgn}
+
+%%% \numberwithin{equation}{section}
+%%% \newtheorem{theorem}[equation]{Theorem} 
+%%% etc.
+
+% We use one numbering for all theorems, lemmas, etc.
+% Use \newtheorem{theorem}{Theorem}[section] to number by section, so that the first theorem in Section 3 would be Theorem 3.1.
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{examples}[theorem]{Examples}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{remarks}[theorem]{Remarks}
+
+\newenvironment{problem}
+	{
+		\bigskip
+		\noindent
+		{\large\textbf{Problem.}}
+		\newline
+	}
+	{
+		\bigskip
+	}
+
+\newenvironment{solution}[1]
+	{
+		\bigskip
+		\noindent
+		{\large\textbf{Solution to #1.}}
+		\newline
+	}
+	{
+		\ensuremath{\blacksquare} \bigskip
+	}
+
+\usepackage{microtype}  % This adjusts spacing between words so as to improve the probability of having line breaks in good places.
+
+\usepackage[
+%	draft,
+%	colorlinks,
+%	pagebackref,
+%	pdfauthor={Authors go here}, % not necessary to enter this
+%	pdftitle={Paper title}, % not necessary to enter this
+]{hyperref} % This allows you to put hyperlinks in your document.
+
+% \begin{center}
+%    \includegraphics[width=0.5\textwidth]{Filename}
+% \end{center}
+\usepackage[utf8]{inputenc}
+
+\title{Tetrahedra UROP Project 2}
+\author{Mauricio Barba da Costa}
+\date{September 2020}
+
+\begin{document}
+
+\maketitle
+\section{Introduction}
+A tetrahedron is a polyhedron with 4 faces. Suppose $T$ is a tetrahedron with angles
+$\alpha_{12},\alpha_{13},\alpha_{14},\alpha_{23},\alpha_{24},\alpha_{34}$. 
+My team and I were curious about tetrahedra whose angles, when viewed as elements of 
+$\R/2\pi\Q$, span a 5-dimensional $\Q$ vector space. In particular, we wanted to know
+if one such tetrahedra could have Dehn invariant zero. Showing that no such tetrahedron
+with this property have Dehn invariant zero would have serious ramifications. For instance, Debrunner showed
+that if a polyhedron $P$ tiles 3D space then it must have Dehn invariant zero.
+\section{The Problem}
+Given a tetrahedron $T$, enumerate the vertices 1,2,3,4. Denote $e_{ij}$
+as the edge between vertices $i$ and $j$ and $\theta_{ij}$ as the dihedral
+angle of $e_{ij}$. One convention that I follow throughout this paper
+is listing edges and angles using the ordering $12,13,14,23,24,34$.
+Suppose we're given dihedral angles $\theta_{12},...,\theta_{34}\in \R/\Q\pi$ 
+that span a 5-dimensional $\Q$-vector space. 
+For a tetrahedron with such angle to have Dehn invariant 0, the edge 
+lengths $e_{12},...,e_{34}$ must be proportional to a tuple of positive
+integers such that $\sum_{i<j} e_{ij}\theta_{ij}=0 \mod{\Q\pi}$. Let $z_{ij}=e^{i\theta_{ij}}$.
+Let $w_{ij}=e^{i(2\theta_{ij})}$. Then $2\cos\theta_{ij}=z_{ij}+z_{ij}^{-1}$
+and $2\cos2\theta_{ij}=w_{ij}+w_{ij}^{-1}$. By Theorem 1 of Wirth-Dreiding,
+$\cos\theta_{ij}=\frac{D_{ij}}{\sqrt{D_{ijk}D_{ijl}}}\in \sqrt{\Q}$
+and consequently $\cos2\theta_{ij}=2\cos^2\theta_{ij}-1\in \Q$. Then $w_{ij}$
+satisfies the polynomial relation $w_{ij}^2-c_{ij} w_{ij}+1=0$ where
+$c_{ij}=2\cos2\theta_{ij}$.
+\section{Numerical Approach}
+The code I developed as part of this project is distributed across 3 branches of my forked
+repository of Abdelatiff Chentouf Anas' original work. It includes my p-adic approach
+to resolving the problem, my numerical approach, and some functions that were generally essential for
+making computations with tetrahedra. 
+
+Suppose $\sum_{i<j} e_{ij}\theta_{ij}=0\mod{\Q\pi}$. Then $\sum e_{ij}\theta_{ij}=q\pi$
+for some $q\in \Q$ so $\sum_{i<j} e_{ij}\theta_{ij} i=iq\pi$. Then $\prod z_{ij}^{e_{ij}}$ is a root
+of unity in a field obtained by adjoining square roots to $\Q$. Now,
+$Gal(\Q(\zeta_n/\Q)=(\Z/n\Z)^\times$ so $\zeta_n\in \Q(\sqrt{\Q})$
+if and only if $(\Z/n\Z)^\times$ 
+is an elementary 2-group. This forces $(\Z/n\Z)^\times=\prod_{p|n}(\Z/p^{e_p}\Z)^\times$
+where $e_2\leq 3,e_3\leq 1$ and $e_p=0$ for all other primes $p$. Thus,
+$n|24$. Thus, $(\prod_{j=1}^6 w_{ij}^{e_{ij}})^{24}=1$. For a tetrahedra $T$, we can 
+calculate $W=\prod_{j=1}^6 w_{ij}^{e_{ij}})^{24}$ with a computer and see if it falls
+within some $\epsilon$ of 1. To identify a counterexample, I iterated over randomly generated
+sextuples, checked if they determined a tetrahedron according to Lemma 4 of Wirth-Dreiding.
+I had some setbacks when I undertook this approach. For a while, I was applying the conditions
+for Lemma 4 of Wirth-Dreiding into my computer incorrectly. When I did realize that I was
+doing it wrong, I had to end my AWS EC2 instance because my free plan was running out.
+It might be worth further exploring this approach.
+\section{p-adic Approach}
+If we think about p-adics now, if $\sum_{i<j}e_{ij}\theta_{ij}=0\mod{\Q\pi}$ then $\sum e_{ij}v_p(w_{ij})=0$
+for every prime $p$. Now, $c_{ij}\in \Q$ so 
+computing $v_p(c_{ij})$ is easy. Calculating, $v_p(w_{ij})$
+is more difficult to calculate since it's in a field extension of $\Q$.
+We can use the following tool:
+$$
+v_p(w_{ij})=\begin{cases}
+  0&v(c_{ij})\geq 0\\
+  \pm v(c_{ij})&v(c_{ij})<0
+\end{cases}
+$$
+If $v_p(w_ij)<0$, whether $v_p(w_{ij})=+v(c_{ij})$ or $v_p(w_{ij})=-v(c_{ij})$ we can't know.
+\section{My algorithm}
+My algorithm exploits the p-adic approach to the problem to find tetrahedra
+whose angles span a 5-dimensional $\Q$-vector space and have Dehn invariant zero. 
+It does this by randomly generating sextuples, checking if they determine a 
+tetrahedra (using Lemma 4 of Wirth-Dreiding). If it is a tetrahedron, then it calcualtes the denominator
+of $c_{ij}$ when it is expressed in simplest terms. Recall that
+$$
+c_{ij}=2\cos2\theta_j=4\cos^2\theta_j-2=\frac{4D_{ij}^2-2D_{ijk}D_{ijl}}{D_{ijk}D_{ijl}}
+$$
+Now, the denominator can be expressed as 
+$$
+L_{ij}=\frac{D_{ijk}D_{ijl}}{\gcd(D_{ijk}D_{ijl},4D_{ij}^2-2D_{ijk}D_{ijl})}=
+\frac{D_{ijk}D_{ijl}}{\gcd(D_{ijk}D_{ijl},4D_{ij}^2)}
+$$
+Then, it gets the prime factors of all these. Then, it
+finds the valuations of all of these with respect to all the primes. We
+can arrange these $L$s into a list $[L_{12},L_{13},L_{14},L_{23},L_{24},L_{34}]$.
+Taking the valuation with respect to $p$ of these yields
+$$
+v_p(L_{ij})=\begin{cases}
+  0&v_p(c_{ij})\geq 0\\
+  \pm v_p(c_{ij})&v_p(c_{ij})<0
+\end{cases}
+$$
+If $\sum_{i<j}\pm e_{ij}v_p(L_{ij})=0$ for some combination of pluses and minuses,
+this is a necessity for the condition to hold. It is not a sufficiency since we don't know
+which combination of pluses and minuses is right. Here is how I checked if 
+$\sum_{i<j}\pm e_{ij}v_p(L_{ij})=0$ computationally:
+
+For every prime $p$
+\begin{enumerate}
+  \item Identify all $L_{ij}$ such that $v_p(L_{ij})>0$. Suppose there are $m$ such 
+  $L_{ij}$s. Insert these valuatioins into an $1\times m$ matrix $VL$. 
+  \item Create an $2^m\times m$ matrix $M$ where the elements in the $i$th row
+  are the digits of the $i$th integer (starting from 0) when expressed in base 2.
+  \item Perform an elementwise multiplication $M\star VL$ then the matrix
+  multiplication $(M\star VL)\times E$ where
+  $$
+  E=\begin{pmatrix}
+    e_{12}\\e_{13}\\e_{14}\\e_{23}\\e_{24}\\e_{34}
+  \end{pmatrix}
+  $$
+  \item Use np.any($(M\star VL)\times E==0$) to see if any combination
+  of pluses and minuses yielded the correct result.
+\end{enumerate}
+Not unless np.any($(M\star VL)\times E==0$) for all primes is the tetrahedron a candidate
+for having Dehn invariant zero. This seems to never happen.
+\section{Some Observations and Analysis}
+I have a \href{https://github.com/mauriciobarba/AC-18.Tetra/tree/main}{GitHub Repo}
+where the code for this project is stored. In here is also a file that's the result
+of running the p-adic analysis of my code. Here is an example output:\\
+
+\begin{verbatim}
+[39, 82, 56, 47, 56, 90]
+[2314830, 4265533440, 36952226532, 384102810, 3407333959107, 796296384]
+193 [0, 0, 0, 1, 1, 1]
+2 [1, 13, 2, 1, 0, 6]
+3 [1, 3, 2, 7, 6, 2]
+5 [1, 1, 0, 1, 0, 0]
+7 [1, 1, 0, 1, 0, 0]
+73 [1, 0, 1, 0, 1, 0]
+13 [0, 0, 2, 1, 3, 1]
+19 [0, 1, 1, 0, 0, 1]
+151 [1, 0, 1, 0, 1, 0]
+29 [0, 1, 1, 0, 0, 1]
+primes passed: {3}
+\end{verbatim}
+This is how you interpret the results:
+\begin{enumerate}
+  \item On the first line is randomly generated sextuple of integers that denote the edges of a tetrahedron
+  in the order that we've been using $(e_{12},e_{13},e_{14},e_{23},e_{24},e_{34})$.
+  \item In the second line is the list $[L_{12},L_{13},L_{14},L_{23},L_{24},e_{34}]$.
+  \item In the lines below that, the number in the first column is a prime that divides
+  some $L_{ij}$. 
+  \item The primes that ``passed" are those such that there exists a combination 
+  of pluses and minuses such that $\sum_{i<j}\pm e_{ij}v_p(L_{ij})=0$. 
+\end{enumerate}
+
+The Erdos-Kac Theorem states that the probability distribution of 
+$$
+\frac{\omega(n)-\log\log n}{\sqrt{\log\log n}}
+$$
+where $\omega(n)$ is the number of distinct
+prime factors of $n$
+is the standard normal distribution. With this, we can calculate the average
+number of distinct prime factors of a number with 9 digits to be 3
+with standard deviation approximately 1.6 (need to cite
+and check if 1.6 is right). $L_{ij}$
+is usually around 9 digits and has more than 3 distinct prime factors.
+For instance, from looking at the table above, 
+$$
+384102810=193\times 2\times 3^7\times 5\times 7\times 13
+$$
+However, the primes that comprise 384102810 tend to be smaller and have a 
+greater power. 
+By contrast 1,000,000,003=$23\times 307\times 141623$. This suggests that the 
+prime factorizations of the $L_{ij}$s is somewhat anomalous. Further exploring why
+this is might bear some fruit. 
+
+The most common valuation list is [1,1,0,1,0,0]
+or some tetrahedral rotation of it. Also, you never get [2,0,0,0,0,0,2] or any
+tetrahedral rotation of this.
+Which valuation lists are possible? I looked at valuation lists mod 2. I found that only a 
+few valuation lists are possible mod 2. They are
+$$
+  [1,1,0,0,1,1]
+$$
+$$
+  [1,1,0,1,0,0]
+$$
+$$
+  [0,0,0,0,0,0]
+$$
+Maybe we can prove the claim
+by showing that for every tetrahedron, there exists a prime $p$ that 
+yields a valuation list [1,1,0,1,0,0] (or some tetrahedral rotation of it). Note that it's not possible that 
+$\pm e_{12}\pm e_{13}\pm e_{23}=0$ otherwise this would lead to a degenerate tetrahedron because
+one of the faces violates the triangle inequality.
+
+In general, my findings support the conjecture that there are no tetrahedra whose angles
+span a 5-dimensional $\Q$ vector space. The output of my code showed that seldom does
+a prime pass. 
+\end{document}

@@ -4,3 +4,7 @@ Setup is pretty straight forward. The base directory is assumed to be the place 
 3. `source tetra-env/bin/activate`
 4. `pip3 install -r requirements.txt`
 5. `python3 -i tetra.py` or `python3 -i 'Symbolic Tetra.py'` depending on which modules you want to use.
+
+Below is my write-up of the final product:
+
+![](./TeX/main.pdf)
